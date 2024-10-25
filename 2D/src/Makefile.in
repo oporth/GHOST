@@ -8,7 +8,7 @@ N        = 1024
 ORD      = 2
 
 # SOLVER:  (read the file SOLVERS for a list of options)
-SOLVER   = HD
+SOLVER   = MHD
 
 # PRECISION: (SINGLE or DOUBLE)
 PRECISION= SINGLE
@@ -29,7 +29,7 @@ P_CUDA   = no
 # FFTWxDIR contains the path to the FFTW libraries; not used if using CUDA
 FFTP     = fftp-3
 FFTW2DIR = /opt/fftw-2.1.5
-FFTW3DIR = /opt/fftw-3.3.4
+FFTW3DIR = /usr
 
 # IKIND    4 in 32 bits machines, 8 in 64 bits machines
 # CSIZE    8 if L1 cache is <= 64 kb, 16 if L1 cache is 128 kb
@@ -90,10 +90,10 @@ TARGET_INTEL  =
 #
 # GFortran compiler (GNU)
 CPP_GNU       = cpp -traditional-cpp
-FC_GNU        = gfortran
+FC_GNU        = mpif90
 CC_GNU        = gcc
-FFLAGS_GNU    = -O4
-CFLAGS_GNU    = -O4
+FFLAGS_GNU    = -O3 -fallow-argument-mismatch
+CFLAGS_GNU    = -O3
 GNU_OMP       = -fopenmp
 TARGET_GNU    = -msse
 #
@@ -135,9 +135,9 @@ MPILD_MPICH   = -lmpich -lmpichf90 -lfmpich -lpthread -lrt -lmpich \
   -lpthread -lrt -luuid
 #
 # OPENMPI (OPEN)
-MPIINC_OPEN   = -I/opt/openmpi-1.10.0/include
-MPILIB_OPEN   = -L/opt/openmpi-1.10.0/lib
-MPILD_OPEN    = -Wl,-commons,use_dylibs -lmpi_usempif08 \
+MPIINC_OPEN   = -I/usr/include/x86_64-linux-gnu
+MPILIB_OPEN   = -L/usr/lib/x86_64-linux-gnu
+MPILD_OPEN    = -lmpi_usempif08 \
   -lmpi_usempi_ignore_tkr -lmpi_mpifh -lmpi
 #
 # MPICH-GM (GM)

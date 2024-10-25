@@ -10,10 +10,47 @@
 ! az (plus bz for the z-component of the magnetic field in 
 ! 2.5D solvers).
 
-! Null vector potential (2D)
- 
-      DO j = jsta,jend
-         DO i = 1,n
-            az(i,j) = 0.0_GP
+! Superposition of harmonic modes with random phases
+! (vector potential, 2D)
+!     mkdn: minimum wave number
+!     mkup: maximum wave number
+!     corr: correlation with the velocity field
+
+      IF (ista.eq.1) THEN
+         az(1,1) = 0.0_GP
+         DO j = 2,n/2+1
+            IF ((ka2(j,1).le.mkup**2).and.(ka2(j,1).ge.mkdn**2)) THEN
+               phase = 2*pi*randu(seed)
+               az(j,1) = (COS(phase)+im*SIN(phase))/sqrt(ka2(j,1))
+               az(n-j+2,1) = conjg(az(j,1))
+            ELSE
+               az(j,1) = 0.0_GP
+               az(n-j+2,1) = 0.0_GP
+            ENDIF
          END DO
-      END DO
+         DO j = 1,n
+            DO i = 2,iend
+               IF ((ka2(j,i).le.mkup**2).and.(ka2(j,i).ge.mkdn**2)) THEN
+                  phase = 2*pi*randu(seed)
+                  az(j,i) = 2*(COS(phase)+im*SIN(phase))/sqrt(ka2(j,i))
+               ELSE
+                  az(j,i) = 0.0_GP
+               ENDIF
+            END DO
+         END DO
+      ELSE
+         DO j = 1,n
+            DO i = ista,iend
+               IF ((ka2(j,i).le.mkup**2).and.(ka2(j,i).ge.mkdn**2)) THEN
+                  phase = 2*pi*randu(seed)
+                  az(j,i) = 2*(COS(phase)+im*SIN(phase))/sqrt(ka2(j,i))
+               ELSE
+                  az(j,i) = 0.0_GP
+               ENDIF
+            END DO
+         END DO
+      ENDIF
+      CALL normalize(az,a0,1,MPI_COMM_WORLD)
+      IF ((corr.gt.tiny).and.(u0.gt.tiny)) THEN
+         az = corr*sqrt(a0)*ps/sqrt(u0)+sqrt(1.0_GP-corr**2)*az
+      ENDIF

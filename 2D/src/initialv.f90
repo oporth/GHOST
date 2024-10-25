@@ -10,30 +10,43 @@
 ! be stored in the array ps, or the velocity field components 
 ! in the arrays vx and vy (plus vz in 2.5D solvers).
 
-! Merging of two positive vortices and a negative vortex 
-! (Schneider et al., Teor. Comp. Fluid Dyn. 9, 191).
-! Vorticity-stream function formulation is used (2D).
-!     u0     : field amplitude
-!     vparam0: size of the vortices
-      DO j = jsta,jend
-         DO i = 1,n
-            R1(i,j) = u0*                                                &
-          (exp(-((2*pi*(real(i,kind=GP)-1)/real(n,kind=GP)-3*pi/4)**2    &
-          +(2*pi*(real(j,kind=GP)-1)/real(n,kind=GP)-pi)**2)/vparam0**2) &
-          +exp(-((2*pi*(real(i,kind=GP)-1)/real(n,kind=GP)-5*pi/4)**2    &
-          +(2*pi*(real(j,kind=GP)-1)/real(n,kind=GP)-pi)**2)/vparam0**2) &
-          -.5*exp(-((2*pi*(real(i,kind=GP)-1)/real(n,kind=GP)-5*pi/4)**2 &
-          +(2*pi*(real(j,kind=GP)-1)/real(n,kind=GP)                     &
-          -pi*(1+1./(2*sqrt(2.))))**2)/vparam0**2))
-         END DO
-      END DO
-      CALL fftp2d_real_to_complex(planrc,R1,ps,MPI_COMM_WORLD)
-      DO i = ista,iend
-         DO j = 1,n
-            IF ((ka2(j,i).le.kmax).and.(ka2(j,i).ge.tiny)) THEN
-               ps(j,i) = ps(j,i)/ka2(j,i)
+! Superposition of harmonic modes with random phases
+! (streamfunction, 2D)
+!     kdn : minimum wave number
+!     kup : maximum wave number
+
+      IF (ista.eq.1) THEN
+         ps(1,1) = 0.0_GP
+         DO j = 2,n/2+1
+            IF ((ka2(j,1).le.kup**2).and.(ka2(j,1).ge.kdn**2)) THEN
+               phase = 2*pi*randu(seed)
+               ps(j,1) = (COS(phase)+im*SIN(phase))/sqrt(ka2(j,1))
+               ps(n-j+2,1) = conjg(ps(j,1))
             ELSE
-               ps(j,i) = 0.0_GP
+               ps(j,1) = 0.0_GP
+               ps(n-j+2,1) = 0.0_GP
             ENDIF
          END DO
-      END DO
+         DO j = 1,n
+            DO i = 2,iend
+               IF ((ka2(j,i).le.kup**2).and.(ka2(j,i).ge.kdn**2)) THEN
+                  phase = 2*pi*randu(seed)
+                  ps(j,i) = 2*(COS(phase)+im*SIN(phase))/sqrt(ka2(j,i))
+               ELSE
+                  ps(j,i) = 0.0_GP
+               ENDIF
+            END DO
+         END DO
+      ELSE
+         DO j = 1,n
+            DO i = ista,iend
+               IF ((ka2(j,i).le.kup**2).and.(ka2(j,i).ge.kdn**2)) THEN
+                  phase = 2*pi*randu(seed)
+                  ps(j,i) = 2*(COS(phase)+im*SIN(phase))/sqrt(ka2(j,i))
+               ELSE
+                  ps(j,i) = 0.0_GP
+               ENDIF
+            END DO
+         END DO
+      ENDIF
+      CALL normalize(ps,u0,1,MPI_COMM_WORLD)
