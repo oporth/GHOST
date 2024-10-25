@@ -92,7 +92,7 @@ TARGET_INTEL  =
 CPP_GNU       = cpp -traditional-cpp
 FC_GNU        = mpif90
 CC_GNU        = gcc
-FFLAGS_GNU    = -O3 -fallow-argument-mismatch
+FFLAGS_GNU    = -O0 -fallow-argument-mismatch -g -fbacktrace -fcheck=all
 CFLAGS_GNU    = -O3
 GNU_OMP       = -fopenmp
 TARGET_GNU    = -msse

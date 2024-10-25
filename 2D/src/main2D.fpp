@@ -229,7 +229,7 @@
       CALL MPI_INIT(ierr)
       CALL MPI_COMM_SIZE(MPI_COMM_WORLD,nprocs,ierr)
       CALL MPI_COMM_RANK(MPI_COMM_WORLD,myrank,ierr)
-
+      
 !
 #if defined(DEF_GHOST_CUDA_)
 #if 1

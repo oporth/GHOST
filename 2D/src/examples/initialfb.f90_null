@@ -12,7 +12,7 @@
 ! Null electromotive forcing
 
  
-      DO j = jsta,jend
+      DO j = ista,iend
          DO i = 1,n
             mk(i,j) = 0.0_GP
          END DO
